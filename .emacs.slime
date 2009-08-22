@@ -1,0 +1,39 @@
+;; Common Lisp hacking with Slime!
+
+;; Note: Paths are specific to my installation on an OSX box.
+;; I've installed all components referenced through the MacPorts system
+;; http://www.macports.org/
+
+(setq load-path (cons "/opt/local/share/emacs/site-lisp/slime" load-path))
+(setq load-path (cons "/opt/local/share/emacs/site-lisp/slime/contrib" load-path))
+(require 'slime-autoloads)
+(setq slime-lisp-implementations
+     `((sbcl ("/opt/local/bin/sbcl"))
+       (clisp ("/opt/local/bin/clisp"))))
+(add-hook 'lisp-mode-hook
+           (lambda ()
+             (cond ((not (featurep 'slime))
+                    (require 'slime)
+                    (normal-mode)))
+	     (require 'slime-fancy)
+	     (require 'slime-typeout-frame)
+	     (require 'slime-asdf)
+	     (require 'slime-tramp)))
+(eval-after-load "slime"
+  '(slime-setup '(slime-fancy slime-banner)))
+
+;; Use `C-c s' to swith to SLIME buffers from any buffer.
+(global-set-key "\C-cs" 'slime-selector)
+
+;; Local copy of the CLHS, supplied by the devel/clisp-hyperspec port
+;; (FreeBSD) or lisp-hyperspec (MacPorts).
+;; Invoke in SLIME with `C-c C-d h', HTML version in web browser.
+(setq common-lisp-hyperspec-root
+      "file:/opt/local/var/macports/software/lisp-hyperspec/7.0_0/opt/local/share/doc/lisp/HyperSpec-7-0/HyperSpec/")
+;; Or, C-M-h for the Info version (configure common-lisp-hyperspec-root above).
+(global-set-key [(control meta h)]
+		'(lambda ()
+		   (interactive)
+		   (ignore-errors
+		     (info (concatenate 'string "(gcl) "
+					(thing-at-point 'symbol))))))
